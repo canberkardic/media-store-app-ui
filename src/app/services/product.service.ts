@@ -1,30 +1,55 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Observable} from "rxjs";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {Product} from "../core/models/models";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
 
-  constructor(private http : HttpClient) { }
-
   baseUrl = "http://localhost:7080/products"
 
-  getProducts(): Observable<any>{
-    return this.http.get(this.baseUrl+"/list-products");
+  constructor(private http: HttpClient) {
   }
 
-  purchaseAllProducts(products : any): Observable<any>{
-    return this.http.post(this.baseUrl + "/purchase",products);
+  getProducts(): Observable<any> {
+    return this.http.get(this.baseUrl + "/list-products");
   }
 
-  saveProduct(product : any){
-    return this.http.post(this.baseUrl+"/save",product);
+  purchaseAllProducts(products: any): Observable<any> {
+    return this.http.post(this.baseUrl + "/purchase", products);
   }
 
-  deleteProduct(product : any){
-    return this.http.delete(this.baseUrl+"/delete",product);
+  saveProduct(productToSave: Product) {
+
+    const payload: any = {
+      product: {
+        ...productToSave
+      },
+      attributes: {}
+    };
+
+    productToSave.attributes.forEach(item => {
+      payload.attributes[item.attributeName] = item.attributeValue;
+    });
+
+    console.log(payload)
+
+    return this.http.post(this.baseUrl + "/save", payload);
+  }
+
+  deleteProduct(productId: number) {
+    const options = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+      }),
+      body: {
+        productId: productId
+      },
+    };
+
+    return this.http.delete(this.baseUrl + "/delete", options);
   }
 
 }

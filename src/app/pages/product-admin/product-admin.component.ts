@@ -1,13 +1,13 @@
-import { Component } from '@angular/core';
-import {CommonModule} from "@angular/common";
+import {Component} from '@angular/core';
 import {ProductService} from "../../services/product.service";
 import {ConfirmationService, MessageService} from "primeng/api";
-import {Product} from "../models/models";
+import {Product} from "../../core/models/models";
 
 @Component({
   selector: 'app-product-admin',
   templateUrl: './product-admin.component.html',
   styleUrls: ['./product-admin.component.css'],
+  providers: [ConfirmationService]
 })
 export class ProductAdminComponent {
   productDialog: boolean = false;
@@ -22,35 +22,24 @@ export class ProductAdminComponent {
 
   statuses!: any[];
 
-  constructor(private productService: ProductService, private messageService: MessageService, private confirmationService: ConfirmationService) {}
+  constructor(private productService: ProductService, private messageService: MessageService, private confirmationService: ConfirmationService) {
+  }
 
   ngOnInit() {
     this.productService.getProducts().subscribe((data) => (this.products = data));
   }
 
+  addNewAttribute() {
+    this.product.attributes?.push({attributeValue: "", attributeName: ""})
+    console.log(this.product.attributes)
+  }
+
   openNew() {
-    this.product = {};
+    this.product = {attributes: []};
     this.submitted = false;
     this.productDialog = true;
   }
 
-  deleteSelectedProducts() {
-    this.confirmationService.confirm({
-      message: 'Are you sure you want to delete the selected products?',
-      header: 'Confirm',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.products = this.products.filter((val) => !this.selectedProducts?.includes(val));
-        this.selectedProducts = null;
-        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
-      }
-    });
-  }
-
-  editProduct(product: Product) {
-    this.product = { ...product };
-    this.productDialog = true;
-  }
 
   deleteProduct(product: Product) {
     this.confirmationService.confirm({
@@ -58,9 +47,19 @@ export class ProductAdminComponent {
       header: 'Confirm',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.products = this.products.filter((val) => val.id !== product.id);
-        this.product = {};
-        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
+        let productId = product.productId;
+        if (productId) {
+          this.productService.deleteProduct(productId).subscribe(data => {
+            this.products = this.products.filter((val) => val.productId !== productId);
+            this.product = {attributes: []};
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Successful',
+              detail: 'Product Deleted',
+              life: 3000
+            });
+          })
+        }
       }
     });
   }
@@ -73,31 +72,21 @@ export class ProductAdminComponent {
   saveProduct() {
     this.submitted = true;
 
+    console.log(this.product)
+
     if (this.product.name?.trim()) {
-      if (this.product.id) {
-        this.products[this.findIndexById(this.product.id)] = this.product;
-        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
-      } else {
-        this.products.push(this.product);
-        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
-      }
 
-      this.products = [...this.products];
-      this.productDialog = false;
-      this.product = {};
+      this.productService.saveProduct(this.product).subscribe((data: any) => {
+        this.products.push(data);
+        this.messageService.add({severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000});
+
+        this.products = [...this.products];
+        this.productDialog = false;
+        this.product = {attributes: []};
+      })
+
+
     }
-  }
-
-  findIndexById(id: number): number {
-    let index = -1;
-    for (let i = 0; i < this.products.length; i++) {
-      if (this.products[i].id === id) {
-        index = i;
-        break;
-      }
-    }
-
-    return index;
   }
 
 

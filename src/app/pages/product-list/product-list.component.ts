@@ -1,12 +1,12 @@
 import {Component} from '@angular/core';
 import {ProductService} from "../../services/product.service";
-import {MessageService} from "primeng/api";
+import {ConfirmationService, MessageService} from "primeng/api";
 
 @Component({
   selector: 'app-product-list',
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css'],
-
+  providers: [ConfirmationService]
 
 })
 export class ProductListComponent {

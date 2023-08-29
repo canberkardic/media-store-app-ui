@@ -1,33 +1,8 @@
-<div style="position:sticky; top:0; z-index: 10; display: flex; align-items: center; justify-content: space-between; background-color: #ffffffb3;   box-shadow: 0px 0px 8px 0px; #888888; height: 5em; margin-bottom: 2px;">
-  <h1 style="margin: 0; padding: 1.5em;">
-    Product List
-  </h1>
+<app-toolbar></app-toolbar>
 
-  <button (click)="sidebarVisible = true" pButton icon="pi pi-shopping-cart" class="mr-5 p-button-link"></button>
-</div>
+
 <div class="body">
-<router-outlet></router-outlet>
+  <router-outlet></router-outlet>
 </div>
-
-<p-sidebar [(visible)]="sidebarVisible" position="right">
-  <h3>Items</h3>
-  <div *ngIf="products.length > 0">
-    <div *ngFor="let p of products">
-        <p>
-          {{p.name}} : {{p.finalPrice}}
-        </p>
-    </div>
-
-    <button (click)="purchaseItems()" pButton class="mt-5 p-button-raised">
-      Purchase
-    </button>
-
-  </div>
-  <div *ngIf="products.length == 0">
-
-  </div>
-</p-sidebar>
-<p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
-
 
 
